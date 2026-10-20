@@ -97,3 +97,58 @@ git push -u origin main                   # 6. 推送并绑定（-u 只需首次
 - **绝不要提交** `文献库/`、`对话记录/`——里面有 `.zotero_api_key`。已在 `.gitignore` 中挡住。
 - 发新版本时，`dist/` 的 zip 不进仓库，改用 GitHub 的 **Releases** 功能上传附件。
 - 当前仓库：https://github.com/311120/aviation-literature-skill
+
+## 九、GitHub 连不上：给 git 配代理
+
+**git 不会自动使用 Windows 系统代理**，必须单独配。连不上时典型报错：
+
+```
+Failed to connect to github.com:443 after 21079 ms: Could not connect to server
+fatal: unable to access '...': CONNECT tunnel failed, response 502
+```
+
+**第一步：查系统代理端口**
+
+设置 → 网络和 Internet → 代理 → 看「地址」和「端口」，或在 PowerShell 里：
+
+```powershell
+Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' | Select-Object ProxyEnable, ProxyServer
+```
+
+**第二步：给 git 配上**（把 `7897` 换成你实际的端口）
+
+```cmd
+git config --global http.proxy http://127.0.0.1:7897
+git config --global https.proxy http://127.0.0.1:7897
+```
+
+**第三步：验证**
+
+```cmd
+git ls-remote origin
+```
+
+能列出 `refs/heads/main` 就说明通了。
+
+**取消代理**（换网络环境或代理关了的时候）
+
+```cmd
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+> 代理软件关掉后，git 仍会尝试连那个端口并报 `Failed to connect to 127.0.0.1:7897`。这时候要么重新打开代理，要么执行上面的取消命令。
+
+## 十、安全重置：`reset --hard origin/main` 前必须验证
+
+这条命令会**用本地记录的远程状态覆盖工作区**。如果 `fetch` 失败，`origin/main` 还是旧值，一 reset 就把你的改动冲掉了。
+
+安全顺序：
+
+```cmd
+git fetch origin
+git log --oneline -1 origin/main    ← 先确认这是你期望的提交，再往下
+git reset --hard origin/main
+```
+
+判断依据：`git reset --hard` 前后 `git rev-parse "HEAD^{tree}"` 应该相同（内容没变，只是历史对齐）。如果树哈希变了，说明你确实在丢弃内容。
