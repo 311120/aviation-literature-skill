@@ -96,4 +96,4 @@ git push -u origin main                   # 6. 推送并绑定（-u 只需首次
 
 - **绝不要提交** `文献库/`、`对话记录/`——里面有 `.zotero_api_key`。已在 `.gitignore` 中挡住。
 - 发新版本时，`dist/` 的 zip 不进仓库，改用 GitHub 的 **Releases** 功能上传附件。
-- 当前仓库：https://github.com/311120/aviation-literature-skill （Private）
+- 当前仓库：https://github.com/311120/aviation-literature-skill

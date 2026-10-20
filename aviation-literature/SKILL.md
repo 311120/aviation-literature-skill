@@ -36,7 +36,7 @@ agent_created: true
   历史对话.md           ← 唯一的历史对话文件，只追加不覆盖
 ```
 
-**Zotero 侧目录**：脚本自动定位 Zotero 数据目录（本机实测 `C:\Users\Admin\Zotero`，非硬编码），入库 PDF 与 `batch.ris` 统一放在其 `skill-import/` 子目录。
+**Zotero 侧目录**：脚本自动定位 Zotero 数据目录（实测默认路径 `%USERPROFILE%\Zotero`，代码内非硬编码），入库 PDF 与 `batch.ris` 统一放在其 `skill-import/` 子目录。
 
 ### 依赖不可用时的降级路径（不得静默失败）
 

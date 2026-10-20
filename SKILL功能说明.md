@@ -2,8 +2,8 @@
 
 > 更新日期：2026-10-12 ｜ skill 名：`aviation-literature` ｜ 当前版本：**v1.5.3**
 > 本目录结构：`aviation-literature/`（skill 本体）+ 3 份配套文档（功能说明 / 使用手册 / 生成指令）
-> 安装位置：工作区 `E:\Learnings\文献查找及管理skill\aviation-literature\`
-> 　　　　　全局 `C:\Users\Admin\.agents\skills\aviation-literature\`（两处内容需保持一致）
+> 安装位置：工作区 `<工作区>\aviation-literature\`
+> 　　　　　全局 `%USERPROFILE%\.agents\skills\aviation-literature\`（两处内容需保持一致）
 > 版本历史见 skill 目录下 `CHANGELOG.md`
 
 本文档面向**维护者**，说明这个 skill 现在能做什么、每部分在哪、以及想加功能时该改哪里。
@@ -336,7 +336,7 @@ python scripts/zotero_grab.py "https://arxiv.org/abs/1" --dry-run # 只校验不
 1. **本地 HTTP API**（Zotero 运行中）：`http://localhost:23119/api/users/0/items`，只读无需 Key
    ✅ **本机已验证**（`api_up()` 返回 True；带 `--pdf/--notes` 时仍走 sqlite 副本取细节）
 2. **sqlite 只读副本**（Zotero 未运行）：定位 `zotero.sqlite` → 复制到临时目录 → 标准库 sqlite3 查询
-   ✅ **本路径已验证**，数据目录 `C:\Users\Admin\Zotero`
+   ✅ **本路径已验证**，默认数据目录 `%USERPROFILE%\Zotero`
    - 数据目录定位顺序：`%APPDATA%\Zotero\Zotero\Profiles\*\prefs.js` 里的 `extensions.zotero.dataDir` → `%USERPROFILE%\Zotero`
    - **绝不直连原库**——Zotero 运行时原库被锁定
    - 会一并复制 `-wal` / `-shm` 日志，避免漏掉未合并数据
@@ -434,7 +434,7 @@ python scripts/zotero_grab.py "https://arxiv.org/abs/1" --dry-run # 只校验不
 | 本地 API 自动建条目 | ✅ 已验证 | 返回真实条目 Key（v1.2.0 打通三重保护；`--authorize` 弹窗授权） |
 | **本地 API 上传 PDF 全文附件** | ✅ **已验证** | v1.3.0 打通四步协议；实测 20,037 字节 PDF 落 `storage/<附件Key>/`，**MD5 与源文件逐字节一致**；回读确认 |
 | RIS 导入 Zotero（GUI） | ⚠️ 未走通 | 需人工操作；首次导入留意格式报错 |
-| Zotero 附件文件 | ⚠️ 逐条判断 | 2026-09-16 复查：多数条目附件**已就位**（如 `storage\GD2RULJC\...HybirdRAG.pdf`）；早前「全部缺失」是旧快照，勿沿用 |
+| Zotero 附件文件 | ⚠️ 逐条判断 | 2026-09-16 复查：多数条目附件**已就位**（如 `storage\<附件KEY>\...HybirdRAG.pdf`）；早前「全部缺失」是旧快照，勿沿用 |
 | Python 环境 | ✅ 可用 | `python` 可正常调用、脚本零第三方依赖；**版本随 PATH 而定**——WorkBuddy 托管环境内实测 3.13.14，系统 `E:\software\python` 为 3.14.7（两者都能跑） |
 | **离线验证集** | ✅ **471/471 通过** | 5 套件（149+66+55+130+71）· 耗时 ~47s · EXIT 0。改脚本后必跑 |
 | **多词查重一致性（v1.5.2 修复）** | ✅ **已验证** | `zotero_query.py` 两条路径统一为分词 AND；实测 `tolerance ontology` 在 sqlite 路径 0 → 4 条 |
@@ -518,7 +518,7 @@ python scripts/zotero_grab.py "https://arxiv.org/abs/1" --dry-run # 只校验不
    这是改脚本后唯一能证明「没破坏既有行为」的手段。
 2. **跑上传闸门**：`python <skill-quality-audit目录>/scripts/audit.py <skill目录> --profile upload`
    ——必须 EXIT 0，命中任一必修项不得交付。
-3. **两处副本同步**：工作区 `E:\Learnings\文献查找及管理skill\aviation-literature\` 与全局 `C:\Users\Admin\.agents\skills\aviation-literature\`。
+3. **两处副本同步**：工作区 `<工作区>\aviation-literature\` 与全局 `%USERPROFILE%\.agents\skills\aviation-literature\`。
    ⚠️ **本机不要用 `xcopy`**——路径含中文时它会以 exit 1 失败（实测多次，甚至留下空目录）。
    用 `sync_skill.py`（见下）或 `Copy-Item -Recurse -Force`，同步后核对文件数与内容一致。
 4. **清掉 `__pycache__\`**：`python -m py_compile` 与跑验证集都会产生缓存目录，拷进 skill 会显得脏。
@@ -533,16 +533,16 @@ python scripts/zotero_grab.py "https://arxiv.org/abs/1" --dry-run # 只校验不
 
 | 脚本 | 用途 | 位置 |
 |---|---|---|
-| `sync_skill.py` | 两处副本同步 + 逐文件一致性校验（替代失效的 xcopy） | `C:\Users\Admin\WorkBuddy\2026-09-16-14-09-19\sync_skill.py` |
-| `pack_skill.py` | 确定性打包（固定时间戳，两次打包 SHA256 一致）+ 包内与源码字节自证 | `C:\Users\Admin\WorkBuddy\2026-09-16-14-09-19\pack_skill.py` |
-| `gate_check.py` | 三处闸门复验：目录副本 / 全局副本 / 分发包解包目录，各跑上传闸门 + 验证集 | `C:\Users\Admin\WorkBuddy\2026-09-16-14-09-19\gate_check.py` |
+| `sync_skill.py` | 两处副本同步 + 逐文件一致性校验（替代失效的 xcopy） | `<原工作区>\sync_skill.py` |
+| `pack_skill.py` | 确定性打包（固定时间戳，两次打包 SHA256 一致）+ 包内与源码字节自证 | `<原工作区>\pack_skill.py` |
+| `gate_check.py` | 三处闸门复验：目录副本 / 全局副本 / 分发包解包目录，各跑上传闸门 + 验证集 | `<原工作区>\gate_check.py` |
 
 ---
 
 ## 九、本目录封装形态
 
 ```text
-E:\Learnings\文献查找及管理skill\
+<工作区>\
 ├── aviation-literature\             ← skill 包，18 文件；可整体拷贝到别的机器/工具
 │   ├── SKILL.md
 │   ├── CHANGELOG.md

@@ -7,7 +7,7 @@ skill 与 Zotero 的关系是**共享文献库**：读题录/附件/笔记/标�
 按优先级自动选择：
 
 1. **本地 HTTP API（Zotero 7+，需 Zotero 正在运行）**：`http://localhost:23119/api/users/0/items`，只读、无需 Key，返回题录级数据。✅ **已实测通过**（2026-09-16 复查：读取与写入均可用，写入细节见下节）。注意本地 API 的索引可能滞后于库内实际状态，**分类列表要取「API ∪ sqlite」两个来源**才完整。Zotero 未运行时自动回退到 sqlite。
-2. **sqlite 只读副本（Zotero 未运行时，或需要 --pdf/--notes/--key 时）**：定位 `zotero.sqlite`（优先读 `%APPDATA%\Zotero\Zotero\Profiles\*\prefs.js` 里的 `extensions.zotero.dataDir`，其次 `%USERPROFILE%\Zotero`），把数据库复制到临时目录后用标准库 sqlite3 查询——**绝不直接连原库**，Zotero 运行时原库处于锁定状态。**此路径已实测通过**（本机数据目录 `C:\Users\Admin\Zotero`）。
+2. **sqlite 只读副本（Zotero 未运行时，或需要 --pdf/--notes/--key 时）**：定位 `zotero.sqlite`（优先读 `%APPDATA%\Zotero\Zotero\Profiles\*\prefs.js` 里的 `extensions.zotero.dataDir`，其次 `%USERPROFILE%\Zotero`），把数据库复制到临时目录后用标准库 sqlite3 查询——**绝不直接连原库**，Zotero 运行时原库处于锁定状态。**此路径已实测通过**（默认数据目录 `%USERPROFILE%\Zotero`）。
 
    关键定位规则：
    - PDF 附件的存储目录名是**附件自身**的 item key（`storage/<附件Key>/文件名.pdf`），不是父条目的 key。脚本用 `itemAttachments.parentItemID`（数字 itemID）匹配条目、再用附件自身 itemID 反查 key。
@@ -25,7 +25,7 @@ python zotero_query.py --key YZA4D3CK                    # 导出条目字段、
 
 **关于 `storage:` 前缀**：如果 `--pdf` 输出的是 `storage:xxx.pdf` 而不是完整本地路径，说明 Zotero 数据库里有该附件记录，但 `storage/<附件Key>/` 下找不到对应文件（常见原因：附件存放在 Zotero 网盘未同步到本地、或被清理过）。此时把状态如实告诉用户，不要假定文件可用；需要全文时让用户在 Zotero 中同步/下载附件，或用该条目的 DOI 从 OpenAlex / Crossref 取开放获取版本。
 
-> 本机实测：2026-09-16 复查时**大量条目的附件本地文件已就位**（如 `storage\GD2RULJC\Xie 等 - 2025 - ...HybirdRAG.pdf`）。早前「20 条附件全部缺失」是当时的快照，不是长期状态——判断时要**逐条看**，不要沿用旧结论。
+> 本机实测：2026-09-16 复查时**大量条目的附件本地文件已就位**（如 `storage\<附件KEY>\Xie 等 - 2025 - ...HybirdRAG.pdf`）。早前「20 条附件全部缺失」是当时的快照，不是长期状态——判断时要**逐条看**，不要沿用旧结论。
 
 ## 自动入库（scripts/zotero_save.py）
 
@@ -69,12 +69,12 @@ python zotero_query.py --key YZA4D3CK                    # 导出条目字段、
 实测记录（2026-09-16，本机真实 Zotero）：
 
 ```
-建条目   → item Key  B8VKVWQR
-建附件   → attach Key ZV9CH5AG
-三步上传 → 落盘 C:\Users\Admin\Zotero\storage\ZV9CH5AG\probe_attachment.pdf
+建条目   → item Key  <条目KEY>
+建附件   → attach Key <附件KEY>
+三步上传 → 落盘 %USERPROFILE%\Zotero\storage\<附件KEY>\probe_attachment.pdf
            20,037 字节，MD5 ff918d7efe9191b30f81fa3438b7aa40
            与源文件 MD5 完全一致（字节级校验通过）
-回读验证 → zotero_query.py --key B8VKVWQR 显示该 PDF 路径 ✅
+回读验证 → zotero_query.py --key <条目KEY> 显示该 PDF 路径 ✅
 ```
 
 脚本把三步上传封装成 `api_attach_pdf(parent_key, pdf_path, data_dir)`，失败时**抛出而非静默**，

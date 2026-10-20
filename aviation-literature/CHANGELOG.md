@@ -325,7 +325,7 @@ search_papers 分级        → OA/SUB/CNKI/? 四类判定与排序顺序均符�
 
 ## 1.3.1
 
-**目录封装 + 配套文档补齐**——用户要求：把 skill 封装在 `E:\Learnings\文献查找及管理skill` 下、
+**目录封装 + 配套文档补齐**——用户要求：把 skill 封装在 `<工作区>` 下、
 清掉无用文件、并把三份文档一并交付。
 
 **改动**
@@ -413,9 +413,9 @@ search_papers 分级        → OA/SUB/CNKI/? 四类判定与排序顺序均符�
   412 可读报错、PDF 不存在提前拒绝、无 Server-ID / 授权被拒时抛 `AuthRequired` 且不重试。
   测试用**假 API 替身**离线跑，并连带替换 `urllib.request.urlopen`（否则 `_server_id()` 会真去连
   本机 23119，若 Zotero 恰在运行就会打到真实库——这是写测试时踩到的坑）；
-- **真实 Zotero 端到端实测通过**：建条目 `B8VKVWQR` → 附件条目 `ZV9CH5AG` → 三步上传 →
-  文件落 `storage\ZV9CH5AG\probe_attachment.pdf`，**20,037 字节、MD5
-  `ff918d7efe9191b30f81fa3438b7aa40` 与源文件逐字节一致** → `zotero_query.py --key B8VKVWQR`
+- **真实 Zotero 端到端实测通过**：建条目 `<条目KEY>` → 附件条目 `<附件KEY>` → 三步上传 →
+  文件落 `storage\<附件KEY>\probe_attachment.pdf`，**20,037 字节、MD5
+  `ff918d7efe9191b30f81fa3438b7aa40` 与源文件逐字节一致** → `zotero_query.py --key <条目KEY>`
   回读确认附件路径正确。探针条目已全部删除（进回收站，可恢复）；
 - 同时实测确认「无 pdf_url 条目」会走 `api_nopdf` 分支并给出正确提示文案。
 

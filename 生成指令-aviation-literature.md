@@ -616,7 +616,7 @@ PDF 与 `batch.ris` 写入 `<Zotero数据目录>/skill-import/`，用户在 Zote
 | 位置 | 路径 |
 |---|---|
 | 工作区 | `<工作区>/.agents/skills/aviation-literature/` |
-| 全局 | `C:\Users\Admin\.agents\skills\aviation-literature\` |
+| 全局 | `%USERPROFILE%\.agents\skills\aviation-literature\` |
 
 两处内容必须保持一致。
 
